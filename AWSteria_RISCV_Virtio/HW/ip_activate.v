@@ -7,13 +7,13 @@ module ip_activate (
 
     input [127:0] activation_code;
     input clk_in;
-    output reg enable,RDY_enable;
+    output wire RDY_enable;
+    output reg enable;
+    wire [127:0] ref_activation_code;
 
-    wire [127:0] ref_activation_code; 
-
+    assign RDY_enable = 1'b1;
     assign ref_activation_code = 128'h 87C0D0FD94C369FA1A4B7E7BC00BD074;
     always @(activation_code or clk_in) begin
-        RDY_enable = 1'b1;
         if (activation_code == ref_activation_code) begin
             enable = 1'b1;
         end else begin
