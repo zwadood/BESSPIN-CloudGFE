@@ -132,8 +132,16 @@ SRCS_C += \
 
 CFLAGS += -std=gnu11 -g -Wall -Werror
 
-CFLAGS += -D SIM_FOR_VCU118
-# CFLAGS += -D SIM_FOR_AWSF1
+# Default target
+TARGET = VCU118
+
+ifeq ($(TARGET),VCU118)
+  CFLAGS += -D SIM_FOR_VCU118
+else ifeq ($(TARGET),AWSF1)
+  CFLAGS += -D SIM_FOR_AWSF1
+else
+  $(error ERROR: please define TARGET=VCU118 or TARGET=AWSF1 for proper DDR setup)
+endif
 
 CFLAGS += -I $(SRC_DIR)
 CFLAGS += -I $(TINYEMU)
