@@ -102,7 +102,7 @@ Bit #(32) adapter_addr_min = 'h_0000_0000;    // 0
 Bit #(32) adapter_addr_max = 'h_000F_FFFF;    // 1 MB
 
 Bit #(32) drm_addr_min     = 'h_0010_0000;    // 1  MB
-Bit #(32) drm_addr_max     = 'h_0010_3FFF;    // 16 KB
+Bit #(32) drm_addr_max     = 'h_0010_FFFF;    // 1  MB + 64  KB
 
 
 function Tuple2 #(Bool, Bit #(1))  fn_addr_to_AXI4L_target_num (Bit #(32) addr);
