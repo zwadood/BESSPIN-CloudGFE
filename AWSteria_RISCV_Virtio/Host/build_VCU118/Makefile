@@ -95,6 +95,7 @@ SRCS_C += \
 CFLAGS += -DCONFIG_RISCV_MAX_XLEN=64 \
 		-DMAX_XLEN=64 \
 		-DCONFIG_SLIRP \
+		-DUSE_ACCELIZE_DRM \
 		-DDEBUG_VIRTIO
 
 # ----------------
@@ -136,9 +137,9 @@ CFLAGS += -I $(SRC_DIR)
 CFLAGS += -I $(TINYEMU)
 CFLAGS += -I $(GDBSTUB)
 
-CC     = gcc $(CFLAGS)
+CC     = clang $(CFLAGS)
 
-LDLIBS = -lpthread -lpthread -lelf
+LDLIBS = -lpthread -laccelize_drmc -lelf
 
 EXE    = exe_Host_VCU118
 
