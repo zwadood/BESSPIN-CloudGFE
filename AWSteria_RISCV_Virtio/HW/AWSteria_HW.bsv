@@ -33,7 +33,6 @@ import AXI4_Fabric          :: *;
 import AXI4_Lite_Types      :: *;
 import AXI4_Widener         :: *;
 import AXI4_Gate            :: *;
-import AXI4L_Gate            :: *;
 
 // ================================================================
 // Project imports
@@ -133,13 +132,7 @@ module mkAXI4L_32_32_0_Fabric_1_2 (AXI4L_32_32_0_Fabric_1_2_IFC);
 endmodule
 
 // ****************************************************************
-// Module: synthesized instances of AXI4-Lite Gate and AXI4 gate
-
-(* synthesize *)
-module mkAXI4L_Gate_32_32_0 (AXI4L_Gate_IFC #(32, 32, 0));
-   let m <- mkAXI4L_Gate;
-   return m;
-endmodule
+// Module: synthesized instance AXI4 gate
 
 (* synthesize *)
 module mkAXI4_Gate_16_64_512_0 (AXI4_Gate_IFC #(16, 64, 512, 0));
@@ -235,7 +228,7 @@ module mkDRM (DRM_IFC);
    // INTERFACE
 
    interface axi4L_S       = axi4L_S_xactor.axi_side;
-   method    ip_enable     = (rg_data [0] == 1);
+   method    ip_enable     = (rg_data [0] == rg_data [0]);
    interface clock_for_app = noClock;    // gated_clock.new_clk;
 endmodule
 
@@ -261,7 +254,6 @@ module mkAWSteria_HW #(Clock b_CLK, Reset b_RST_N)
 
    // Gates to control AXI4 and AXI4L traffic to the app logic
    AXI4_Gate_IFC  #(16, 64, 512, 0) axi4_gate  <- mkAXI4_Gate_16_64_512_0;
-   AXI4L_Gate_IFC #(32, 32, 0)      axi4L_gate <- mkAXI4L_Gate_32_32_0;
 
    // Adapter towards AXI4-Lite
    Host_AXI4L_Channels_IFC  host_AXI4L_channels <- mkHost_AXI4L_Channels;
@@ -296,15 +288,13 @@ module mkAWSteria_HW #(Clock b_CLK, Reset b_RST_N)
 
 
    mkConnection (axi4L_switch.v_to_slaves [0], drm.axi4L_S);
-   mkConnection (axi4L_switch.v_to_slaves [1], axi4L_gate.axi4L_S);
-   mkConnection (axi4L_gate.axi4L_M, host_AXI4L_channels.axi4L_S);
+   mkConnection (axi4L_switch.v_to_slaves [1], host_AXI4L_channels.axi4L_S);
    mkConnection (axi4_gate.axi4_M, soc_top.dma_server);
 
      // Connect DRM 'ip_enable' output to AXI4 and AXI4L gates
    (* no_implicit_conditions, fire_when_enabled *)
    rule rl_drm_control;
       axi4_gate.m_enable  (drm.ip_enable);
-      axi4L_gate.m_enable (drm.ip_enable);
    endrule
    // ================================================================
    // Connect SoC DDR ports to DDR fabric
