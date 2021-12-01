@@ -39,6 +39,9 @@
 // Project includes
 
 #include "AWSteria_Host_lib.h"
+#ifdef USE_ACCELIZE_DRM
+#include "accelize/drmc.h"
+#endif
 
 #include "HS_msg.h"
 
@@ -62,6 +65,29 @@ extern int pci_read_fd;
 extern int pci_write_fd;
 #endif
 
+
+// Define functions to read and write FPGA registers to use them as
+// callbacks in DrmManager.
+void *comms_state = NULL;
+
+#ifdef USE_ACCELIZE_DRM
+#define drm_controller_base_addr 0x100000
+int read_register( uint32_t offset, uint32_t* value, void* user_p ) {
+  return  AWSteria_AXI4L_read (comms_state, drm_controller_base_addr + offset, value);
+}
+
+int write_register( uint32_t offset, uint32_t value, void* user_p ) {
+
+  return  AWSteria_AXI4L_write (comms_state, drm_controller_base_addr + offset, value);
+
+}
+// Define asynchronous error callback
+void asynch_error( const char* err_msg, void* user_p ) {
+    fprintf( stderr, "%s", err_msg );
+}
+
+ DrmManager* drm_manager = NULL;
+#endif
 // ================================================================
 // Perform initializations for PCI lib or AWS_Sim_Lib
 
@@ -132,10 +158,40 @@ void *HS_msg_initialize (void)
 
     if (verbosity > 0)
 	fprintf (stdout, "Initializing AWSteria host-side API libs.\n");
-    void *comms_state = AWSteria_Host_init ();
+    comms_state = AWSteria_Host_init ();
     if (comms_state == NULL)
 	return NULL;
+#ifdef USE_ACCELIZE_DRM
+    // Instantiate DrmManager with previously defined functions and
+    // configuration files
 
+     DrmManager* drm_manager = NULL;
+    int ctx = 0;
+
+    if (DrmManager_alloc(
+
+
+        &drm_manager,
+        // Configuration files paths
+        "./conf.json",
+        "./cred.json",
+        // Read/write register functions callbacks
+        read_register,
+        write_register,
+        // Asynchronous error callback
+        asynch_error,
+        &ctx))
+        {
+        // In the C case, the last error message is stored inside the
+        // "DrmManager"
+        fprintf( stderr, "%s", drm_manager->error_message );
+        } 
+
+    if ( DrmManager_activate( drm_manager, false ) )
+    fprintf( stderr, "%s", drm_manager->error_message );
+    else
+    fprintf (stdout, "DRM_activation_done\n");
+#endif
     initialized = true;
     return comms_state;
 }
@@ -152,6 +208,14 @@ int HS_msg_finalize (void *opaque)
     }
 
     int err;
+    
+#ifdef USE_ACCELIZE_DRM
+// DRM deactivate and free    
+    if ( DrmManager_deactivate( drm_manager, false ) )
+    fprintf( stderr, "%s", drm_manager->error_message );
+    if ( DrmManager_free( &drm_manager ) )
+    fprintf( stderr, "%s", drm_manager->error_message );
+#endif
 
 #ifdef IN_F1
     // TODO: this should move to AWteria_Infra/Platform_VCU118/Host/AWSteria_Host_lib.c

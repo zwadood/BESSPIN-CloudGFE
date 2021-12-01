@@ -101,7 +101,8 @@ SRCS_C += \
 CFLAGS += -DCONFIG_RISCV_MAX_XLEN=64 \
 		-DMAX_XLEN=64 \
 		-DCONFIG_SLIRP \
-		-DDEBUG_VIRTIO
+		-DDEBUG_VIRTIO \
+		-DUSE_ACCELIZE_DRM
 
 # ----------------
 # AWSteria infra
@@ -133,8 +134,7 @@ SRCS_C += \
 # ================================================================
 # C compilation
 
-CFLAGS += -std=gnu11 -g -Wall -Werror
-
+CFLAGS += -std=gnu11 -g -Wall -Werror 
 CFLAGS += -D IN_AWSF1
 
 CFLAGS += -I $(AWSTERIA_INFRA_REPO)/Include_API
@@ -143,9 +143,9 @@ CFLAGS += -I $(SRC_DIR)
 CFLAGS += -I $(TINYEMU)
 CFLAGS += -I $(GDBSTUB)
 
-CC     = gcc $(CFLAGS)
+CC     = clang $(CFLAGS)
 
-LDLIBS = -lfpga_mgmt -lcrypto -lpthread -lelf
+LDLIBS = -lfpga_mgmt -lcrypto -lpthread -lelf -laccelize_drmc
 
 EXE    = exe_Host_AWSF1
 

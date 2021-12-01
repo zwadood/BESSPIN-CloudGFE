@@ -181,6 +181,8 @@ copy_bsc_RTL_for_garnet:
 	cp -p  $(BLUESPEC_HOME)/lib/Verilog/RevertReg.v    $(FOR_GARNET_DIR)/src/
 	cp -p  $(BLUESPEC_HOME)/lib/Verilog/SizedFIFO0.v   $(FOR_GARNET_DIR)/src/
 	cp -p  $(BLUESPEC_HOME)/lib/Verilog/SizedFIFO.v    $(FOR_GARNET_DIR)/src/
+	cp -f  $(AWSTERIA_REPO)/HW/mkDRM.v  			   $(FOR_GARNET_DIR)/src/ 
+	cp -f  $(AWSTERIA_REPO)/HW/ip_activate.v  		   $(FOR_GARNET_DIR)/src/ 
 
 # ================================================================
 
